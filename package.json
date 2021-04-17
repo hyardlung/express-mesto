@@ -1,0 +1,24 @@
+{
+  "name": "express-mesto",
+  "version": "1.0.0",
+  "description": "Проект Mesto (фронтенд + бэкенд)",
+  "main": "app.js",
+  "scripts": {
+    "lint": "npx eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hyardlung/express-mesto.git"
+  },
+  "author": "Dmitry Volkov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hyardlung/express-mesto/issues"
+  },
+  "homepage": "https://github.com/Hyardlung/express-mesto#readme",
+  "devDependencies": {
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
+  }
+}
