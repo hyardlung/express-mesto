@@ -13,7 +13,16 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use((req, res, next) => {
+  req.user = {
+    _id: '607b12b114311536e0687768',
+  };
+
+  next();
+});
+
 app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
