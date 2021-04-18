@@ -3,21 +3,23 @@ const User = require('../models/user');
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: err.message });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new Error('Not valid id'))
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.message === 'Not valid id') {
-        res.status(404).send({ message: 'Такого пользователя не существует' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
-      }
-    });
+    .then((user) => {
+      if (user) res.send(user);
+      res.status(404).send({ message: 'Пользователь с таким ID не найден' });
+    })
+    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -32,7 +34,11 @@ module.exports.updateProfile = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
-    { new: true },
+    {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    },
   )
     .then((user) => res.send(user))
     .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
@@ -43,7 +49,11 @@ module.exports.updateAvatar = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
-    { new: true },
+    {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    },
   )
     .then((user) => res.send(user))
     .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
