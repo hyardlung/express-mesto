@@ -10,9 +10,7 @@ module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(new Error('Not valid id'))
-    .then((user) => {
-      res.send(user);
-    })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.message === 'Not valid id') {
         res.status(404).send({ message: 'Такого пользователя не существует' });
