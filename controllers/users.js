@@ -2,12 +2,15 @@ const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
+    .orFail(new Error('NotValidId'))
     .then((users) => res.send(users))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
+        res.status(404).send({ message: 'Объект не найден' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(500).send({ message: 'Ошибка на стороне сервера' });
       }
     });
 };
@@ -15,18 +18,30 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .then((user) => {
-      if (user) res.send(user);
-      res.status(404).send({ message: 'Пользователь с таким ID не найден' });
-    })
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
+    .orFail(new Error('NotValidId'))
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
+        res.status(404).send({ message: 'Объект не найден' });
+      } else {
+        res.status(500).send({ message: 'Ошибка на стороне сервера' });
+      }
+    });
 };
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      } else {
+        res.status(500).send({ message: 'Ошибка на стороне сервера' });
+      }
+    });
 };
 
 module.exports.updateProfile = (req, res) => {
@@ -37,11 +52,19 @@ module.exports.updateProfile = (req, res) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
     },
   )
+    .orFail(new Error('NotValidId'))
     .then((user) => res.send(user))
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      } else if (err.message === 'NotValidId') {
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      } else {
+        res.status(500).send({ message: 'Ошибка на стороне сервера' });
+      }
+    });
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -52,9 +75,8 @@ module.exports.updateAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
     },
   )
     .then((user) => res.send(user))
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
