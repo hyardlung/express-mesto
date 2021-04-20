@@ -53,6 +53,7 @@ module.exports.likeCard = (req, res) => {
       runValidators: true,
     },
   )
+    .orFail(new Error('NotValidId'))
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -74,11 +75,14 @@ module.exports.dislikeCard = (req, res) => {
       runValidators: true,
     },
   )
+    .orFail(new Error('NotValidId'))
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
+        console.log(err);
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else if (err.message === 'NotValidId') {
+        console.log(err);
         res.status(404).send({ message: 'Такой карточки не существует' });
       } else {
         res.status(500).send({ message: 'Ошибка на стороне сервера' });
