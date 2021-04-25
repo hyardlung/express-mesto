@@ -1,9 +1,11 @@
 const express = require('express');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
+app.use(helmet());
 app.use(express.json());
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
@@ -13,6 +15,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+// временное решение для авторизации
 app.use((req, res, next) => {
   req.user = {
     _id: '607c4735e9b14f0c74af897b',
