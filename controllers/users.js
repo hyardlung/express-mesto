@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+// РЕГИСТРАЦИЯ (создание пользователя, добавление в базу данных)
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email,
@@ -21,8 +23,27 @@ module.exports.createUser = (req, res) => {
         res.status(500).send({ message: 'Ошибка на стороне сервера' });
       }
     });
+  // .catch((err) => res.status(400).send(err));
 };
 
+// АВТОРИЗАЦИЯ ()
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        { expiresIn: '7d' },
+      );
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
+// получение всех пользователей из бд
 module.exports.getUsers = (req, res) => {
   User.find({})
     .orFail(new Error('NotValidId'))
@@ -38,6 +59,7 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
+// получение пользователя из бд по ID
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
@@ -54,6 +76,7 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
+// обновление данных пользователя
 module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
@@ -77,6 +100,7 @@ module.exports.updateProfile = (req, res) => {
     });
 };
 
+// обновление аватара пользователя
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
