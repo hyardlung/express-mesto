@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 module.exports = (req, res, next) => {
   // извлечение авторизационного заголовка
   const { authorization } = req.headers;
-
   // проверка наличия заголовка или того, что он начинается с Bearer
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.status(401).send({ message: 'Необходима авторизация' });
@@ -17,7 +16,7 @@ module.exports = (req, res, next) => {
 
   try {
     // попытка верифицировать токен
-    payload = jwt.verify(token, 'secret');
+    payload = jwt.verify(token, 'some-secret-string');
   } catch (err) {
     // отправка ошибки при неудаче
     return res.status(401).send({ message: 'Необходима авторизация' });
