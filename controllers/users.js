@@ -23,10 +23,9 @@ module.exports.createUser = (req, res) => {
         res.status(500).send({ message: 'Ошибка на стороне сервера' });
       }
     });
-  // .catch((err) => res.status(400).send(err));
 };
 
-// АВТОРИЗАЦИЯ ()
+// АВТОРИЗАЦИЯ
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
@@ -34,6 +33,7 @@ module.exports.login = (req, res) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
+        'some-secret-string',
         { expiresIn: '7d' },
       );
       res.send({ token });
@@ -43,20 +43,17 @@ module.exports.login = (req, res) => {
     });
 };
 
-// получение всех пользователей из бд
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .orFail(new Error('NotValidId'))
-    .then((users) => res.send(users))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else if (err.message === 'NotValidId') {
-        res.status(404).send({ message: 'Объект не найден' });
+// получение залогиненного пользователя
+module.exports.getMe = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (user) {
+        res.send(user);
       } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера' });
+        res.status(404).send('Пользователь с таким ID не найден');
       }
-    });
+    })
+    .catch((err) => next(err));
 };
 
 // получение пользователя из бд по ID
@@ -70,6 +67,22 @@ module.exports.getUserById = (req, res) => {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else if (err.message === 'NotValidId') {
         res.status(404).send({ message: 'Пользователь с указанным ID не найден' });
+      } else {
+        res.status(500).send({ message: 'Ошибка на стороне сервера' });
+      }
+    });
+};
+
+// получение всех пользователей из бд
+module.exports.getUsers = (req, res) => {
+  User.find({})
+    .orFail(new Error('NotValidId'))
+    .then((users) => res.send(users))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
+        res.status(404).send({ message: 'Объект не найден' });
       } else {
         res.status(500).send({ message: 'Ошибка на стороне сервера' });
       }

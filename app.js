@@ -18,15 +18,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-// временное решение для авторизации
-app.use((req, res, next) => {
-  req.user = {
-    _id: '607c4735e9b14f0c74af897b',
-  };
-
-  next();
-});
-
 app.post('/signup', createUser);
 app.post('/signin', login);
 
