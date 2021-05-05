@@ -30,4 +30,11 @@ app.use((req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 
+app.use((err, req, res, next) => {
+  // если у ошибки нет статуса, выставляется 500
+  const { statusCode = 500, message } = err;
+  // проверка статуса и выставление сообщения в зависимости от него
+  res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+});
+
 app.listen(PORT);

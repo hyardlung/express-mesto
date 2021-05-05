@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const NotFoundError = require('../errors/not-found-err');
+
 // РЕГИСТРАЦИЯ (создание пользователя, добавление в базу данных)
 module.exports.createUser = (req, res) => {
   const {
@@ -57,20 +59,16 @@ module.exports.getMe = (req, res, next) => {
 };
 
 // получение пользователя из бд по ID
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new Error('NotValidId'))
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else if (err.message === 'NotValidId') {
-        res.status(404).send({ message: 'Пользователь с указанным ID не найден' });
-      } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера' });
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь с таким ID не найден');
       }
-    });
+      res.send(user);
+    })
+    .catch(next);
 };
 
 // получение всех пользователей из бд
