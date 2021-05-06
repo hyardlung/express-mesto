@@ -1,12 +1,15 @@
 const jwt = require('jsonwebtoken');
 
+const UnauthorizedError = require('../errors/unauthorized-err');
+const ForbiddenError = require('../errors/forbidden-err');
+
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   // извлечение авторизационного заголовка
   const { authorization } = req.headers;
   // проверка наличия заголовка или того, что он начинается с Bearer
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    throw new UnauthorizedError('Необходима авторизация');
   }
 
   // извлечение токена
@@ -19,7 +22,7 @@ module.exports = (req, res, next) => {
     payload = jwt.verify(token, 'some-secret-string');
   } catch (err) {
     // отправка ошибки при неудаче
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    throw new ForbiddenError('В доступе отказано');
   }
 
   req.user = payload; // запись payload в объект запроса
