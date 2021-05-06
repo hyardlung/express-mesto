@@ -35,7 +35,9 @@ module.exports.createUser = (req, res, next) => {
 // АВТОРИЗАЦИЯ
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
+  if (!email || !password) {
+    throw new BadRequestError('Не передан email или пароль');
+  }
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
