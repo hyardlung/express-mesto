@@ -8,7 +8,8 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   // извлечение авторизационного заголовка
-  const { authorization } = req.headers;
+  // const { authorization } = req.headers;
+  const authorization = req.cookies.mestoToken;
   // проверка наличия заголовка или того, что он начинается с Bearer
   if (!authorization || !authorization.startsWith('Bearer ')) {
     throw new UnauthorizedError('Необходима авторизация');

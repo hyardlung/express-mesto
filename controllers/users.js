@@ -46,7 +46,12 @@ module.exports.login = (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
-      return res.send({ token });
+      res.cookie('mestoToken', token, {
+        maxAge: 360000,
+        httpOnly: true,
+        sameSite: true,
+      })
+        .send({ _id: user._id });
     })
     .catch(() => {
       throw new UnauthorizedError('Необходима авторизация');
