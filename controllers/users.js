@@ -8,12 +8,15 @@ const ConflictError = require('../errors/conflict-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
 // const ForbiddenError = require('../errors/forbidden-err');
 
+const MONGO_DUPLICATE_ERROR_CODE = 11000; // код ошибки при дублировании данных
+const SALT_ROUNDS = 10; // количество раундов хеширования
+
 // РЕГИСТРАЦИЯ (создание пользователя, добавление в базу данных)
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10)
+  bcrypt.hash(password, SALT_ROUNDS)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
@@ -22,7 +25,7 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         throw new BadRequestError('Переданы некорректные данные при создании пользователя');
       }
-      if (err.name === 'MongoError' || err.code === 11000) {
+      if (err.name === 'MongoError' || err.code === MONGO_DUPLICATE_ERROR_CODE) {
         throw new ConflictError('Пользователь с таким email уже зарегистрирован');
       }
     })
