@@ -10,6 +10,7 @@ const UnauthorizedError = require('../errors/unauthorized-err');
 
 const MONGO_DUPLICATE_ERROR_CODE = 11000; // код ошибки при дублировании данных
 const SALT_ROUNDS = 10; // количество раундов хеширования
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // РЕГИСТРАЦИЯ (создание пользователя, добавление в базу данных)
 module.exports.createUser = (req, res, next) => {
@@ -42,7 +43,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-string',
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
       return res.send({ token });

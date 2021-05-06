@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const UnauthorizedError = require('../errors/unauthorized-err');
 const ForbiddenError = require('../errors/forbidden-err');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   // извлечение авторизационного заголовка
@@ -19,7 +21,7 @@ module.exports = (req, res, next) => {
 
   try {
     // попытка верифицировать токен
-    payload = jwt.verify(token, 'some-secret-string');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
     // отправка ошибки при неудаче
     throw new ForbiddenError('В доступе отказано');
