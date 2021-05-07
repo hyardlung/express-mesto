@@ -9,14 +9,10 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 module.exports = (req, res, next) => {
   // извлечение авторизационного заголовка
   // const { authorization } = req.headers;
-  const authorization = req.cookies.mestoToken;
-  // проверка наличия заголовка или того, что он начинается с Bearer
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  const token = req.cookies.mestoToken;
+  if (!token) {
     throw new UnauthorizedError('Необходима авторизация');
   }
-
-  // извлечение токена
-  const token = authorization.replace('Bearer ', '');
   // верификация токена
   let payload;
 
