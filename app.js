@@ -4,9 +4,9 @@ const { celebrate, Joi, errors } = require('celebrate');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/not-found-err');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -42,6 +42,10 @@ app.use(auth);
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
+app.use('*', () => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
+});
 
 app.use(errors());
 
