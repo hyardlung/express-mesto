@@ -1,6 +1,7 @@
 const Card = require('../models/card');
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
 // получение всех карточек
 module.exports.getCards = (req, res, next) => {
@@ -26,15 +27,26 @@ module.exports.createCard = (req, res, next) => {
 // удаление карточки по ID
 module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+  const owner = req.user._id;
+  // поиск карточки и проверка её ID на соответствие ID пользователя
+  Card.findById(cardId)
     .then((card) => {
-      if (!card) throw new NotFoundError('Такой карточки не существует');
-      return res.send({ message: 'Карточка успешно удалена' });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные при удалении карточки');
+      if (!card) {
+        throw new NotFoundError('Такой карточки не существует');
       }
+      if (card.owner._id.toString() !== owner) {
+        throw new ForbiddenError('В доступе отказано');
+      }
+      // поиск и удаление карточки
+      return Card.findByIdAndRemove(cardId)
+        .populate(['owner', 'likes'])
+        .then(() => {
+          if (!card) {
+            throw new NotFoundError('Такой карточки не существует');
+          }
+          res.send({ message: 'Карточка успешно удалена' });
+        })
+        .catch(next);
     })
     .catch(next);
 };
@@ -48,12 +60,10 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: owner } },
     { new: true, runValidators: true },
   )
+    .populate(['owner', 'likes'])
     .then((card) => {
       if (!card) throw new NotFoundError('Такой карточки не существует');
       res.send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') throw new BadRequestError('Некорректный ID карточки');
     })
     .catch(next);
 };
@@ -73,9 +83,6 @@ module.exports.dislikeCard = (req, res, next) => {
     .then((card) => {
       if (!card) throw new NotFoundError('Такой карточки не существует');
       res.send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') throw new BadRequestError('Некорректный ID карточки');
     })
     .catch(next);
 };

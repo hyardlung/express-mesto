@@ -6,10 +6,9 @@ const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request-err');
 const ConflictError = require('../errors/conflict-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
-// const ForbiddenError = require('../errors/forbidden-err');
 
-const MONGO_DUPLICATE_ERROR_CODE = 11000; // код ошибки при дублировании данных
 const SALT_ROUNDS = 10; // количество раундов хеширования
+const MONGO_DUPLICATE_ERROR_CODE = 11000; // код ошибки при дублировании данных
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 // РЕГИСТРАЦИЯ (создание пользователя, добавление в базу данных)
@@ -36,9 +35,6 @@ module.exports.createUser = (req, res, next) => {
 // АВТОРИЗАЦИЯ
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    throw new BadRequestError('Не передан email или пароль');
-  }
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
@@ -54,7 +50,7 @@ module.exports.login = (req, res, next) => {
         .send({ _id: user._id });
     })
     .catch(() => {
-      throw new UnauthorizedError('Необходима авторизация');
+      throw new UnauthorizedError('Неправильные почта или пароль');
     })
     .catch(next);
 };
@@ -64,7 +60,7 @@ module.exports.getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) throw new NotFoundError('Пользователь с таким ID не найден');
-      return res.send(user);
+      res.send(user);
     })
     .catch(next);
 };
@@ -74,13 +70,8 @@ module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
-      if (!user) throw new NotFoundError('');
+      if (!user) throw new NotFoundError('Пользователь с таким ID не найден');
       return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        throw new BadRequestError('Некорректный формат ID пользователя');
-      }
     })
     .catch(next);
 };
@@ -107,11 +98,6 @@ module.exports.updateProfile = (req, res, next) => {
       if (!user) throw new NotFoundError('Пользователь с таким ID не найден');
       res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении профиля');
-      }
-    })
     .catch(next);
 };
 
@@ -129,11 +115,6 @@ module.exports.updateAvatar = (req, res, next) => {
     .then((user) => {
       if (!user) throw new NotFoundError('Пользователь с таким ID не найден');
       return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Некорректный формат ссылки');
-      }
     })
     .catch(next);
 };

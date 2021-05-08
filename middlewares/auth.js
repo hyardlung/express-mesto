@@ -5,10 +5,8 @@ const ForbiddenError = require('../errors/forbidden-err');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-// eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   // извлечение авторизационного заголовка
-  // const { authorization } = req.headers;
   const token = req.cookies.mestoToken;
   if (!token) {
     throw new UnauthorizedError('Необходима авторизация');
