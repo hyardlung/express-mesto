@@ -40,12 +40,7 @@ module.exports.deleteCardById = (req, res, next) => {
       // поиск и удаление карточки
       return Card.findByIdAndRemove(cardId)
         .populate(['owner', 'likes'])
-        .then(() => {
-          if (!card) {
-            throw new NotFoundError('Такой карточки не существует');
-          }
-          res.send({ message: 'Карточка успешно удалена' });
-        })
+        .then(() => res.send({ message: 'Карточка успешно удалена' }))
         .catch(next);
     })
     .catch(next);
