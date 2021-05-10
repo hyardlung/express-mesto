@@ -24,6 +24,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(requestLogger);
+
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -44,6 +46,8 @@ app.use(auth);
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
+app.use(errorLogger);
 
 app.use('*', () => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
