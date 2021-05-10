@@ -1,11 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const { celebrate, Joi, errors } = require('celebrate');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
+const { errors, celebrate, Joi } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
 const NotFoundError = require('./errors/not-found-err');
 
 const app = express();
