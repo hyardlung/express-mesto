@@ -33,6 +33,6 @@
     "helmet": "^4.5.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.13.6",
-    "validator": "^13.6.0"
+    "validator": "^13.7.0"
   }
 }
