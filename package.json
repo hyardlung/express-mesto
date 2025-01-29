@@ -32,7 +32,7 @@
     "express": "^4.17.1",
     "helmet": "^4.5.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.12.4",
+    "mongoose": "^6.13.6",
     "validator": "^13.6.0"
   }
 }
